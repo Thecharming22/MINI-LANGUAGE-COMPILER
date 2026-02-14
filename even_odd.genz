@@ -1,0 +1,12 @@
+sigma x=tea;
+spam(sigma i=0;i<x;i++)
+{
+    vibeCheck(i%2==0)
+    {
+        spill i+ "is even";
+    }
+    vibeFlop
+    {
+        spill i+ "is odd";
+    }
+}

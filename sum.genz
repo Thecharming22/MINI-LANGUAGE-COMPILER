@@ -1,0 +1,4 @@
+sigma a=tea;
+sigma b=tea;
+sigma sum=a+b;
+spill sum;
