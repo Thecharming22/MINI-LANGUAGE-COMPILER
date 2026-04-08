@@ -1,0 +1,8 @@
+sigma a = tea;
+sigma b = tea;
+sigma c = tea;
+sigma x = tea;
+
+sigma y = a * x * x + b * x + c;
+
+spill y;
