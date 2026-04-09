@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GenZ Compiler</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>⚡ GenZ Compiler</h1>
+
+    <form method="POST">
+        <textarea spellcheck="false" name="code" placeholder="Write your GenZ code here...">{{ code }}</textarea>
+
+        <button type="submit">▶ Run Code</button>
+    </form>
+
+    <div class="output">
+        <h2>Output</h2>
+        <pre>{{ output }}</pre>
+    </div>
+</div>
+
+</body>
+</html>
