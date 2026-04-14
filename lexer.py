@@ -1,4 +1,5 @@
 from thetokens import Token 
+
 KEYWORDS= {
     "sigma": "INT",
     "vibeCheck": "IF",
@@ -17,6 +18,7 @@ KEYWORDS= {
     "sus": "BOOLEAN",
     "dm": "STRING"
 }
+
 class Lexer:
     def __init__(self, text):
         self.text = text
@@ -28,6 +30,7 @@ class Lexer:
 
         while self.pos < len(self.text):
             current = self.text[self.pos]
+
             if current == '\n':
                 self.line += 1
                 self.pos += 1
@@ -35,6 +38,20 @@ class Lexer:
             
             if current.isspace():
                 self.pos += 1
+                continue
+
+            # 🔥 STRING LITERAL SUPPORT
+            if current == '"':
+                self.pos += 1
+                start = self.pos
+
+                while self.pos < len(self.text) and self.text[self.pos] != '"':
+                    self.pos += 1
+
+                value = self.text[start:self.pos]
+                tokens.append(Token("STRING_LITERAL", value, self.line))
+
+                self.pos += 1  # skip closing "
                 continue
 
             if current.isalpha():
@@ -78,5 +95,6 @@ class Lexer:
 
             tokens.append(Token("UNKNOWN", current,self.line))
             self.pos += 1
+
         tokens.append(Token("EOF", None, self.line))
         return tokens

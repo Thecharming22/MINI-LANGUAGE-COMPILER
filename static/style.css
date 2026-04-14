@@ -1,53 +1,398 @@
+.compiler-header {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-family: 'Pacifico', cursive;
+  font-size: 60px;
+
+  color: #ff8fab;
+
+  /* DARK PINK SHADOW */
+  text-shadow:
+    2px 2px 0 #c2185b,
+    4px 4px 8px rgba(194, 24, 91, 0.4);
+
+  filter: drop-shadow(0 0 8px rgba(255, 100, 150, 0.4));
+
+  z-index: 50;
+}
+
+/* Background like XP wallpaper */
 body {
-    margin: 0;
-    background-color: #0f172a;
-    color: white;
-    font-family: 'Consolas', monospace;
+  margin: 0;
+  font-family: "Tahoma", sans-serif;
+  background: linear-gradient(135deg, #fbc2eb, #a6c1ee); /* pastel gradient */
+  position: relative;
+  min-height: 100vh;
 }
 
-.container {
-    width: 90%;
-    margin: auto;
-    padding: 20px;
+/* Grid overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(#ffffff40 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff40 1px, transparent 1px);
+  background-size: 40px 40px; /* grid spacing */
+  pointer-events: none;
+  z-index: -1;
 }
 
-h1 {
-    color: #38bdf8;
+/* Sparkle container behind everything */
+.sparkle-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* above grid, below windows */
+  pointer-events: none;
 }
 
+/* Sparkle style (star-like) */
+.sparkle {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  clip-path: polygon(
+    50% 0%, 60% 35%, 100% 50%, 60% 65%, 50% 100%, 
+    40% 65%, 0% 50%, 40% 35%
+  );
+  position: absolute;
+  animation: twinkle 2s infinite alternate;
+  opacity: 0.8;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1.2); }
+}
+
+/* Scatter sparkles with nth-child selectors */
+.sparkle:nth-child(1) { top: 10%; left: 20%; }
+.sparkle:nth-child(2) { top: 30%; left: 70%; }
+.sparkle:nth-child(3) { top: 50%; left: 40%; }
+.sparkle:nth-child(4) { top: 65%; left: 15%; }
+.sparkle:nth-child(5) { top: 80%; left: 60%; }
+.sparkle:nth-child(6) { top: 25%; left: 85%; }
+.sparkle:nth-child(7) { top: 15%; left: 50%; }
+.sparkle:nth-child(8) { top: 75%; left: 30%; }
+.sparkle:nth-child(9) { top: 45%; left: 90%; }
+.sparkle:nth-child(10){ top: 60%; left: 5%; }
+
+/* Pixel-style buttons */
+.pixel-button {
+  background: #ffccff;
+  border: 2px solid #000;
+  box-shadow: 2px 2px #000;
+  font-family: "Press Start 2P", monospace;
+  padding: 10px 20px;
+}
+
+/* Dialog window */
+.dialog {
+  background: #fff;
+  border: 3px solid #ff99cc;
+  box-shadow: 4px 4px #999;
+  padding: 20px;
+  width: 250px;
+}
+
+/* Loading bar */
+.loading-bar {
+  width: 180px;   /* reduced width */
+  height: 20px;
+  border: 2px solid #000;
+  background: #eee;
+  position: relative;
+}
+.loading-bar::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 75%; /* progress */
+  background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+}
+
+/* Heart shape */
+.heart {
+  width: 50px;
+  height: 50px;
+  background: red;
+  position: relative;
+  transform: rotate(-45deg);
+}
+.heart::before,
+.heart::after {
+  content: "";
+  width: 50px;
+  height: 50px;
+  background: red;
+  border-radius: 50%;
+  position: absolute;
+}
+.heart::before { top: -25px; left: 0; }
+.heart::after { left: 25px; top: 0; }
+
+/* Center everything */
+.desktop {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+}
+
+/* Compiler window fixed size */
+.window.main {
+  width: 90%;
+  max-width: 1100px;
+  height: 550px;       
+  position: fixed;       /* fixed height */
+  background: #ece9d8;
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px #888;
+  z-index: 10;
+  z-index: 10;       /* always above background */
+  display: flex;
+  flex-direction: column;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Smaller scattered windows */
+.window.small {
+  width: 250px;
+  min-height: 150px;
+  position: absolute;
+}
+
+/* Window box */
+.window {
+  background: #ece9d8;
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px #888;
+}
+
+/* Title bar */
+.title-bar {
+  background: linear-gradient(to right, #0055ff, #3399ff);
+  color: white;
+  text-shadow: 1px 1px #000;
+  padding: 8px;
+  font-weight: bold;
+}
+
+/* Content area scrollable */
+.window-content {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+/* Textarea */
 textarea {
-    width: 100%;
-    height: 250px;
-    background: #020617;
-    color: #22c55e;
-    border: 1px solid #334155;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 8px;
+  width: 100%;
+  height: 150px;
+  border: 2px inset #999;
+  padding: 12px;
+  font-family: monospace;
+  resize: none;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 10px;
 }
 
 button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+  background: #d4d0c8;
+  border: 2px outset #fff;
+  padding: 6px 12px;
+  margin-right: 5px;
+  cursor: pointer;
 }
 
-button:hover {
-    background: #1d4ed8;
+button:active {
+  border: 2px inset #000;
 }
 
-.output {
-    margin-top: 20px;
-    background: #020617;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #334155;
+/* Output box scrollable */
+.output-box {
+  margin-top: 15px;
+  background: white;
+  border: 2px inset #999;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 pre {
-    color: #22c55e;
+  white-space: pre-wrap;
 }
+
+/* Center content inside Emoji window */
+.window.small.emoji .window-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
+}
+
+/* Center content inside Loading window */
+.window.small.loading .window-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* GIF 1 window adjustments */
+.window.small.gif1 {
+  width: 220px;   /* decreased window width */
+  height: 180px;  /* decreased window height */
+  margin-top: -70px;   /* keep it pushed upwards */
+  left: 320px;
+}
+
+.window.small.gif1 img {
+  max-width: 70%;   /* shrink image more */
+  max-height: 70%;  /* shrink image more */
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+/* GIF 3 window adjustments */
+.window.small.gif3 {
+  width: 260px;    /* increased width */
+  height: 220px;   /* increased height */
+  bottom: 80px;
+  left: 100px;
+}
+
+.window.small.gif3 img {
+  max-width: 100%;   /* allow full width */
+  max-height: 100%;  /* allow full height */
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+
+/* Music Player window */
+.window.small.music {
+  width: 380px;   /* expanded width toward the right side */
+  height: 170px;  /* keep vertical size balanced */
+  background: #fffbe6;
+  border: 2px solid #000;
+  box-shadow: 4px 4px #888;
+}
+
+.window.small.music .controls {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+}
+
+.window.small.music button {
+  background: #d4d0c8;
+  border: 2px outset #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.window.small.music button:active {
+  border: 2px inset #000;
+}
+
+/* Progress bar */
+.window.small.music .progress {
+  width: 90%;
+  height: 12px;
+  border: 2px solid #000;
+  background: #eee;
+  margin: 10px auto;
+  position: relative;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+}
+/* Retro header bar */
+.retro-header {
+  background: #d8aefc;       /* light purple */
+  border: 2px solid #ff69b4; /* pink border */
+  color: #000;
+  font-family: "Courier New", monospace;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;              /* match image width */
+}
+
+.retro-header .icon {
+  margin-right: 6px;
+}
+
+.retro-header .controls span {
+  margin-left: 6px;
+  cursor: pointer;
+  color: #ff69b4;
+}
+
+/* Image area */
+.retro-image {
+  width: 300px;
+  border: 2px solid #ff69b4;
+  background: #fff;
+  padding: 6px;
+  box-shadow: 4px 4px #888;
+}
+
+.retro-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.window.small.dialog {
+  width: 250px;
+  min-height: 150px;
+  background: #ece9d8;          /* same beige */
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px #888;
+  position: absolute;
+  display: flex;                /* ensures header + content stack */
+  flex-direction: column;
+  margin-left: 500px;
+  margin-bottom: -110px;
+}
+
+.window.small.dialog .title-bar {
+  background: linear-gradient(to right, #0055ff, #3399ff);
+  color: white;
+  text-shadow: 1px 1px #000;
+  padding: 8px;
+  font-weight: bold;
+}
+
+.window.small.dialog .window-content {
+  flex: 1;                      /* fills remaining space */
+  padding: 15px;
+  text-align: center;
+}
+.window.small.gif4 {
+  background: transparent;   /* remove beige background */
+  border: none;              /* remove default border */
+  box-shadow: none;          /* remove shadow */
+  width: auto;               /* let retro-image define width */
+  height: auto;              /* let retro-image define height */
+  position: absolute;
+}
+

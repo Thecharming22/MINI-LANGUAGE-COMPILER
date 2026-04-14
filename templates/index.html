@@ -1,25 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>GenZ Compiler</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
-<body>
 
-<div class="container">
-    <h1>⚡ GenZ Compiler</h1>
+<!-- status passed from backend -->
+<body data-status="{{ status }}">
 
-    <form method="POST">
-        <textarea spellcheck="false" name="code" placeholder="Write your GenZ code here...">{{ code }}</textarea>
-
-        <button type="submit">▶ Run Code</button>
-    </form>
-
-    <div class="output">
-        <h2>Output</h2>
-        <pre>{{ output }}</pre>
-    </div>
+<!-- Sparkles background -->
+<div class="sparkle-bg">
+  <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+  <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+  <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+  <div class="sparkle"></div>
 </div>
+
+<div class="desktop">
+
+  <div class="compiler-header">✨ GenZ Compiler ✨</div>
+
+  <!-- Compiler Window -->
+  <div class="window main">
+    <div class="title-bar">💻 GenZ Compiler</div>
+    <div class="window-content">
+
+      <form method="POST" id="compilerForm">
+        <textarea id="codeArea" name="code" placeholder="Type your code here...">{{ code }}</textarea>
+        <div class="buttons">
+          <button type="submit">▶ Run</button>
+          <button type="button" id="clearBtn">❌ Clear</button>
+        </div>
+      </form>
+
+      <div class="output-box">
+        <h3>Output</h3>
+        <pre id="outputBox">{{ output }}</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Files -->
+  <div class="window small files" style="top:30px; left:50px;">
+    <div class="title-bar">📂 Files</div>
+    <div class="window-content">
+      <div class="pixel-button">A</div>
+      <div class="pixel-button">B</div>
+      <div class="pixel-button">C</div>
+    </div>
+  </div>
+
+  <!-- Music Player -->
+  <div class="window small music" style="bottom:25px; left:750px;">
+    <div class="title-bar">🎵 Music Player</div>
+    <div class="window-content">
+      <p style="font-size:12px; margin:0;">Now Playing: sample.mp3</p>
+      <audio id="player" src="{{ url_for('static', filename='music/mytrack.mp3') }}"></audio>
+
+      <div class="controls">
+        <button onclick="player.play()">▶ Play</button>
+        <button onclick="player.pause()">⏸ Pause</button>
+        <button onclick="player.currentTime=0">⏮ Restart</button>
+      </div>
+
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+  </div>
+
+  <!-- Compiler Sounds -->
+  <audio id="successSound" src="{{ url_for('static', filename='music/success.mp3') }}"></audio>
+  <audio id="errorSound" src="{{ url_for('static', filename='music/error.mp3') }}"></audio>
+
+  <!-- Emoji -->
+  <div class="window small emoji" style="bottom:30px; right:120px;">
+    <div class="title-bar">😀 Emoji</div>
+    <div class="window-content"><div class="heart"></div></div>
+  </div>
+
+  <!-- GIF 1 -->
+  <div class="window small gif1" style="bottom:20px; left:1200px;">
+    <div class="title-bar">🎞 GIF 1</div>
+    <div class="window-content">
+      <img src="static/images/dancing-voting-day.gif">
+    </div>
+  </div>
+
+  <!-- GIF 2 -->
+  <div class="window small gif2" style="bottom:230px; right:60px;">
+    <div class="title-bar">🎞 GIF 2</div>
+    <div class="window-content">
+      <img src="static/images/oiia-cat.gif" style="width:100%;">
+    </div>
+  </div>
+
+  <!-- GIF 3 -->
+  <div class="window small gif3" style="bottom:80px; left:100px;">
+    <div class="title-bar">🎞 GIF 3</div>
+    <div class="window-content">
+      <img src="static/images/maxwell-cat.gif" style="width:100%;">
+    </div>
+  </div>
+
+  <!-- Emoji Panel -->
+  <div class="window small gif5" style="bottom:20px; left:400px;">
+    <div class="title-bar">💅 Emoji Panel</div>
+    <div class="window-content" style="font-size:60px; text-align:center;">💅</div>
+  </div>
+
+  <!-- GIF 4 -->
+  <div class="window small gif4" style="top:250px; left:70px;">
+    <div class="retro-header">
+      <span class="icon">🎞</span> untitled - Paint
+      <div class="controls"><span class="min">_</span><span class="max">□</span><span class="close">X</span></div>
+    </div>
+    <div class="retro-image">
+      <img src="static/images/outrun-synthwave.gif">
+    </div>
+  </div>
+
+  <!-- Retro Image -->
+  <div class="retro-block" style="position:absolute; top:20px; left:90%; transform:translateX(-50%);">
+    <div class="retro-header">
+      🎨 untitled - Paint
+      <div class="controls"><span class="min">_</span><span class="max">□</span><span class="close">X</span></div>
+    </div>
+    <div class="retro-image">
+      <img src="static/images/image.gif">
+    </div>
+  </div>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+  const player = document.getElementById("player");
+  const progressBar = document.getElementById("progressBar");
+
+  document.getElementById("clearBtn").onclick = () => {
+    codeArea.value = "";
+    outputBox.textContent = "";
+  };
+
+  player.addEventListener("timeupdate", () => {
+    progressBar.style.width = (player.currentTime / player.duration) * 100 + "%";
+  });
+
+  /* 🔊 Play success / error sound based on backend status */
+  window.addEventListener("load", () => {
+    const status = document.body.dataset.status;
+    const successSound = document.getElementById("successSound");
+    const errorSound = document.getElementById("errorSound");
+
+    if (status === "success") {
+      successSound.play();
+    } else if (status === "error") {
+      errorSound.play();
+    }
+  });
+</script>
 
 </body>
 </html>
