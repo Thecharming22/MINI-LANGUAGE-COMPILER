@@ -1,9 +1,15 @@
 dm text=tea;
 sigma vowels=0;
 sigma consonants=0;
+
 spam(sigma i=0;i<text.length;i++)
 {
-    vibeCheck(text[i]=="a"||text[i]=="e"||text[i]=="i"||text[i]="o"||text[i]="u"||text[i]="A"||text[i]="E"||text[i]="I"||text[i]="O"||text[i]="U"){
+    vibeCheck(
+        text[i]=="a"||text[i]=="e"||text[i]=="i"||
+        text[i]=="o"||text[i]=="u"||
+        text[i]=="A"||text[i]=="E"||text[i]=="I"||
+        text[i]=="O"||text[i]=="U"
+    ){
         vowels++;
     }
     vibeFlop
@@ -11,8 +17,8 @@ spam(sigma i=0;i<text.length;i++)
         consonants++;
     }
 }
+
 spill "Vowels:";
 spill vowels;
-
 spill "Consonants:";
-spill  consonants;
+spill consonants;

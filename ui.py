@@ -1,3 +1,4 @@
+from executor import   Executor
 from flask import Flask, render_template, request
 from lexer import Lexer
 from parser import Parser
@@ -20,9 +21,17 @@ def index():
             parser = Parser(tokens)
             parser.parse()
 
+            user_input = request.form.get("user_input")
+
+            executor = Executor()
+            if user_input:
+                executor.input_values = [x.strip() for x in user_input.split(",")]
+
+            result = executor.execute(tokens)
+
             output = "Parsing Successful! No syntax errors found.\n\n"
-            output += "--- TOKENS ---\n"
-            output += "\n".join(str(t) for t in tokens)
+            output += "--- OUTPUT ---\n"
+            output += result
 
             status = "success"
 
