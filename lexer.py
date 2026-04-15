@@ -1,22 +1,14 @@
 from thetokens import Token 
 
-KEYWORDS= {
+KEYWORDS = {
     "sigma": "INT",
+    "drip": "FLOAT",
+    "dm": "STRING",
     "vibeCheck": "IF",
     "vibeFlop": "ELSE",
     "spill": "PRINT",
-    "greenFlag": "TRUE",
-    "redFlag": "FALSE",
-    "holdUp": "BREAK",
-    "alsoCheck": "ELSEIF",
-    "keepGoin": "CONTINUE",
-    "drip": "FLOAT",
     "tea": "INPUT",
-    "slayWhile": "WHILE",
-    "spam": "FOR",
-    "alpha": "CHAR",
-    "sus": "BOOLEAN",
-    "dm": "STRING"
+    "spam": "FOR"
 }
 
 class Lexer:
@@ -35,44 +27,40 @@ class Lexer:
                 self.line += 1
                 self.pos += 1
                 continue
-            
+
             if current.isspace():
                 self.pos += 1
                 continue
 
-            # 🔥 STRING LITERAL SUPPORT
+            # STRING
             if current == '"':
                 self.pos += 1
                 start = self.pos
-
-                while self.pos < len(self.text) and self.text[self.pos] != '"':
+                while self.text[self.pos] != '"':
                     self.pos += 1
-
                 value = self.text[start:self.pos]
                 tokens.append(Token("STRING_LITERAL", value, self.line))
-
-                self.pos += 1  # skip closing "
+                self.pos += 1
                 continue
 
+            # IDENTIFIER / KEYWORD
             if current.isalpha():
                 start = self.pos
-                while self.pos < len(self.text) and (self.text[self.pos].isalnum() or self.text[self.pos] == "_"):
+                while self.pos < len(self.text) and self.text[self.pos].isalnum():
                     self.pos += 1
                 word = self.text[start:self.pos]
-                if word in KEYWORDS:
-                    tokens.append(Token(KEYWORDS[word],word,self.line))
-                else:
-                    tokens.append(Token("IDENTIFIER",word,self.line))
+                tokens.append(Token(KEYWORDS.get(word, "IDENTIFIER"), word, self.line))
                 continue
 
+            # NUMBER (float supported)
             if current.isdigit():
                 start = self.pos
-                while self.pos < len(self.text) and self.text[self.pos].isdigit():
+                while self.pos < len(self.text) and (self.text[self.pos].isdigit() or self.text[self.pos] == "."):
                     self.pos += 1
-                number = self.text[start:self.pos]
-                tokens.append(Token("NUMBER", number,self.line))
+                tokens.append(Token("NUMBER", self.text[start:self.pos], self.line))
                 continue
 
+            # OPERATORS
             if current in "+-*/%":
                 tokens.append(Token("OPERATOR", current, self.line))
                 self.pos += 1
@@ -80,12 +68,16 @@ class Lexer:
 
             if current in "=<>!":
                 if self.pos+1 < len(self.text) and self.text[self.pos+1] == "=":
-                    two_char = self.text[self.pos:self.pos+2]
-                    tokens.append(Token("OPERATOR", two_char, self.line))
+                    tokens.append(Token("OPERATOR", self.text[self.pos:self.pos+2], self.line))
                     self.pos += 2
                 else:
                     tokens.append(Token("OPERATOR", current, self.line))
                     self.pos += 1
+                continue
+
+            if current == "|" and self.pos+1 < len(self.text) and self.text[self.pos+1] == "|":
+                tokens.append(Token("OPERATOR", "||", self.line))
+                self.pos += 2
                 continue
 
             if current in "(){};,":
@@ -93,7 +85,7 @@ class Lexer:
                 self.pos += 1
                 continue
 
-            tokens.append(Token("UNKNOWN", current,self.line))
+            tokens.append(Token("UNKNOWN", current, self.line))
             self.pos += 1
 
         tokens.append(Token("EOF", None, self.line))
