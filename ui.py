@@ -1,5 +1,5 @@
-from executor import   Executor
-from flask import Flask, render_template, request
+from executor import Executor
+from flask import Flask, render_template, request, jsonify
 from lexer import Lexer
 from parser import Parser
 
@@ -21,10 +21,19 @@ def index():
             parser = Parser(tokens)
             parser.parse()
 
-            user_input = request.form.get("user_input")
+            # Check if 'tea' is present in tokens
+            needs_input = any(tok.type == "INPUT" for tok in tokens)
 
             executor = Executor()
-            if user_input:
+
+            if needs_input:
+                # Agar tea detect hua toh user_input field dikhana
+                user_input = request.form.get("user_input")
+                if not user_input:
+                    return render_template("index.html",
+                                           output="Program requires input (tea). Please enter values.",
+                                           code=code,
+                                           status="input_needed")
                 executor.input_values = [x.strip() for x in user_input.split(",")]
 
             result = executor.execute(tokens)
@@ -32,7 +41,6 @@ def index():
             output = "Parsing Successful! No syntax errors found.\n\n"
             output += "--- OUTPUT ---\n"
             output += result
-
             status = "success"
 
         except Exception as e:
