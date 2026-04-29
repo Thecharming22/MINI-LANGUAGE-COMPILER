@@ -19,24 +19,33 @@ def index():
 
         try:
             parser = Parser(tokens)
-            parser.parse()
 
-            # Check if 'tea' is present in tokens
+            # ✅ CHANGE 1: get AST
+            ast = parser.parse()
+
+            # Check if 'tea' is present in tokens (keep this)
             needs_input = any(tok.type == "INPUT" for tok in tokens)
 
             executor = Executor()
 
             if needs_input:
-                # Agar tea detect hua toh user_input field dikhana
                 user_input = request.form.get("user_input")
                 if not user_input:
-                    return render_template("index.html",
-                                           output="Program requires input (tea). Please enter values.",
-                                           code=code,
-                                           status="input_needed")
-                executor.input_values = [x.strip() for x in user_input.split(",")]
+                    return render_template(
+                        "index.html",
+                        output="Program requires input (tea). Please enter values.",
+                        code=code,
+                        status="input_needed"
+                    )
 
-            result = executor.execute(tokens)
+                # ✅ CHANGE 2: match Executor constructor
+                executor.inputs = [x.strip() for x in user_input.split(",")]
+
+            # ❌ OLD
+            # result = executor.execute(tokens)
+
+            # ✅ CHANGE 3: run AST
+            result = executor.run(ast)
 
             output = "Parsing Successful! No syntax errors found.\n\n"
             output += "--- OUTPUT ---\n"

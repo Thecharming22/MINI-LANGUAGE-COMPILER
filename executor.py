@@ -1,234 +1,129 @@
 class Executor:
-    def __init__(self, input_values=None):
-        self.variables = {}
-        self.input_values = input_values or []
+    def __init__(self, inputs=None):
+        self.vars = {}
+        self.inputs = inputs or []
 
-    def safe(self, tokens, i):
-        return i < len(tokens)
+    def run(self, node):
+        if node[0] == "PROGRAM":
+            output = ""
+            for stmt in node[1]:
+                res = self.run(stmt)
+                if res:
+                    output += res
+            return output
 
-    def execute(self, tokens):
-        i = 0
+        elif node[0] == "DECL":
+            _, type_, name, expr = node
+            value = self.eval(expr) if expr else None
+
+            if type_ == "INT":
+                value = int(value)
+            elif type_ == "FLOAT":
+                value = float(value)
+            elif type_ == "STRING":
+                value = str(value)
+
+            self.vars[name] = value
+
+        elif node[0] == "ASSIGN":
+            _, name, expr = node
+            self.vars[name] = self.eval(expr)
+
+        elif node[0] == "UPDATE":
+            _, name, op = node
+            if op == "++":
+                self.vars[name] += 1
+            else:
+                self.vars[name] -= 1
+
+        elif node[0] == "PRINT":
+            return str(self.eval(node[1])) + "\n"
+
+        elif node[0] == "IF":
+            _, cond, if_block, else_block = node
+            if self.eval(cond):
+                return self.exec_block(if_block)
+            elif else_block:
+                return self.exec_block(else_block)
+
+        elif node[0] == "FOR":
+            _, init, cond, update, block = node
+
+            self.run(init)
+            output = ""
+
+            while self.eval(cond):
+                output += self.exec_block(block)
+                self.run(update)
+
+            return output
+
+    def exec_block(self, block):
         output = ""
-
-        while i < len(tokens):
-            token = tokens[i]
-
-            # 🔹 DECLARATION
-            if token.type in ["INT", "FLOAT", "STRING"] and self.safe(tokens, i+1):
-                var_name = tokens[i+1].value
-                value = self.evaluate_expression(tokens, i+3)
-
-                if token.type == "INT":
-                    self.variables[var_name] = int(value)
-                elif token.type == "FLOAT":
-                    self.variables[var_name] = float(value)
-                else:
-                    self.variables[var_name] = str(value)
-
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-
-            # 🔹 ASSIGNMENT
-            elif token.type == "IDENTIFIER" and self.safe(tokens, i+1) and tokens[i+1].value == "=":
-                var_name = token.value
-                value = self.evaluate_expression(tokens, i+2)
-                self.variables[var_name] = value
-
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-
-            # 🔹 ++ / --
-            elif token.type == "IDENTIFIER" and self.safe(tokens, i+1) and tokens[i+1].value in ["++", "--"]:
-                var_name = token.value
-                if tokens[i+1].value == "++":
-                    self.variables[var_name] = self.variables.get(var_name, 0) + 1
-                else:
-                    self.variables[var_name] = self.variables.get(var_name, 0) - 1
-
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-
-            # 🔹 PRINT
-            elif token.type == "PRINT":
-                val = self.evaluate_expression(tokens, i+1)
-                output += str(val) + "\n"
-
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-
-            # 🔹 IF / ELSE
-            elif token.type == "IF":
-
-                i += 1
-                while self.safe(tokens, i) and tokens[i].value != "(":
-                    i += 1
-                i += 1
-
-                cond_start = i
-                while self.safe(tokens, i) and tokens[i].value != ")":
-                    i += 1
-                cond_end = i
-
-                condition = self.evaluate_expression(tokens, cond_start, cond_end)
-                i += 1
-
-                while self.safe(tokens, i) and tokens[i].value != "{":
-                    i += 1
-
-                if_start = i + 1
-                brace = 1
-                i += 1
-
-                while brace > 0 and self.safe(tokens, i):
-                    if tokens[i].value == "{":
-                        brace += 1
-                    elif tokens[i].value == "}":
-                        brace -= 1
-                    i += 1
-
-                if_end = i - 1
-
-                has_else = False
-                else_start = else_end = None
-
-                if self.safe(tokens, i) and tokens[i].type == "ELSE":
-                    has_else = True
-                    i += 1
-
-                    while self.safe(tokens, i) and tokens[i].value != "{":
-                        i += 1
-
-                    else_start = i + 1
-                    brace = 1
-                    i += 1
-
-                    while brace > 0 and self.safe(tokens, i):
-                        if tokens[i].value == "{":
-                            brace += 1
-                        elif tokens[i].value == "}":
-                            brace -= 1
-                        i += 1
-
-                    else_end = i - 1
-
-                if condition:
-                    output += self.execute(tokens[if_start:if_end])
-                elif has_else:
-                    output += self.execute(tokens[else_start:else_end])
-
-                continue
-
-            # 🔹 FOR LOOP
-            elif token.type == "FOR":
-                i += 2
-
-                init_start = i
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-                self.execute(tokens[init_start:i+1])
-
-                i += 1
-                cond_start = i
-                while self.safe(tokens, i) and tokens[i].value != ";":
-                    i += 1
-                cond_end = i
-
-                i += 1
-                update_start = i
-                while self.safe(tokens, i) and tokens[i].value != ")":
-                    i += 1
-                update_end = i
-
-                i += 1
-                while self.safe(tokens, i) and tokens[i].value != "{":
-                    i += 1
-
-                block_start = i + 1
-                brace = 1
-                i += 1
-
-                while brace > 0 and self.safe(tokens, i):
-                    if tokens[i].value == "{":
-                        brace += 1
-                    elif tokens[i].value == "}":
-                        brace -= 1
-                    i += 1
-
-                block_end = i - 1
-
-                while self.evaluate_expression(tokens, cond_start, cond_end):
-                    output += self.execute(tokens[block_start:block_end])
-                    self.execute(tokens[update_start:update_end])
-
-                continue
-
-            i += 1
-
+        for stmt in block:
+            res = self.run(stmt)
+            if res:
+                output += res
         return output
 
-    def evaluate_expression(self, tokens, i, end=None):
-        expr_parts = []
+    # ---------------- EXPRESSIONS ----------------
 
-        while self.safe(tokens, i) and (end is None or i < end) and tokens[i].value not in [";", ")", "}"]:
-            tok = tokens[i]
+    def eval(self, node):
+        if node is None:
+            return None
 
-            # 🔹 IDENTIFIER
-            if tok.type == "IDENTIFIER":
-                val = self.variables.get(tok.value, tok.value)
-                expr_parts.append(repr(val) if isinstance(val, str) else str(val))
+        if node[0] == "NUM":
+            return node[1]
 
-            # 🔹 STRING
-            elif tok.type == "STRING_LITERAL":
-                expr_parts.append(f"'{tok.value}'")
+        elif node[0] == "STR":
+            return node[1]
 
-            # 🔹 NUMBER
-            elif tok.type == "NUMBER":
-                expr_parts.append(tok.value)
+        elif node[0] == "VAR":
+            return self.vars.get(node[1], 0)
 
-            # 🔹 INPUT
-            elif tok.type == "INPUT":
-                val = self.input_values.pop(0)
-                expr_parts.append(repr(val))
+        elif node[0] == "INPUT":
+            return self.inputs.pop(0)
 
-            # 🔹 OPERATORS
-            elif tok.type == "OPERATOR":
-                if tok.value == "||":
-                    expr_parts.append("or")
-                elif tok.value == "&&":
-                    expr_parts.append("and")
+        elif node[0] == "BINOP":
+            _, op, left, right = node
+            l = self.eval(left)
+            r = self.eval(right)
+
+            if op == "+": return l + r
+            if op == "-": return l - r
+            if op == "*": return l * r
+            if op == "/": return l / r
+            if op == "%": return l % r
+
+            if op == "==": return l == r
+            if op == "!=": return l != r
+            if op == "<": return l < r
+            if op == ">": return l > r
+            if op == "<=": return l <= r
+            if op == ">=": return l >= r
+
+            if op == "&&": return l and r
+            if op == "||": return l or r
+        elif node[0] == "PROP":
+            _, obj, prop = node
+
+            value = self.eval(obj)
+
+            if prop == "length":
+                if isinstance(value, str):
+                    return len(value)
                 else:
-                    expr_parts.append(tok.value)
-
-            # 🔹 DOT (length)
-            elif tok.type == "SEPARATOR" and tok.value == ".":
-                if self.safe(tokens, i+1) and tokens[i+1].value == "length":
-                    prev = expr_parts.pop()
-                    expr_parts.append(f"len({prev})")
-                    i += 1
-
-            # 🔹 ARRAY INDEXING (FIXED)
-            elif tok.type == "SEPARATOR" and tok.value == "[":
-                i += 1
-                index_parts = []
-
-                while self.safe(tokens, i) and tokens[i].value != "]":
-                    if tokens[i].type == "IDENTIFIER":
-                        index_parts.append(str(self.variables.get(tokens[i].value, tokens[i].value)))
-                    else:
-                        index_parts.append(tokens[i].value)
-                    i += 1
-
-                index_expr = "".join(index_parts)
-                prev = expr_parts.pop()
-
-                expr_parts.append(f"({prev})[{index_expr}]")
+                    raise Exception(f".length not supported on type {type(value)}")
 
             else:
-                expr_parts.append(tok.value)
+                raise Exception(f"Unknown property '{prop}'")
+        elif node[0] == "INDEX":
+            _, obj, index_node = node
 
-            i += 1
+            value = self.eval(obj)
+            index = self.eval(index_node)
 
-        try:
-            return eval(" ".join(expr_parts))
-        except:
-            return False
+            try:
+                return value[int(index)]
+            except:
+                raise Exception(f"Invalid index access on {value}")

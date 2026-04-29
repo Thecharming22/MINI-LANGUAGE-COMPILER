@@ -1,5 +1,6 @@
-dm text = "tea";
+dm text = "aeioubcd";
 sigma vowels = 0;
+sigma conso =0;
 
 spam(sigma i = 0; i < text.length; i++)
 {
@@ -11,7 +12,12 @@ spam(sigma i = 0; i < text.length; i++)
     ){
         vowels++;
     }
+   vibeFlop{
+       conso++;
+   }
 }
 
 spill "Vowels:";
 spill vowels;
+spill "Consonents :";
+spill conso;
