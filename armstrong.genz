@@ -1,0 +1,19 @@
+sigma n = tea;
+sigma temp = n;
+sigma sum = 0;
+
+spam(sigma i = 0; i < 3; i = i + 1)
+{
+    sigma digit = temp % 10;
+    sum = sum + digit * digit * digit;
+    temp = temp / 10;
+}
+
+vibeCheck(sum == n)
+{
+    spill "Armstrong";
+}
+vibeFlop
+{
+    spill "Not Armstrong";
+}
