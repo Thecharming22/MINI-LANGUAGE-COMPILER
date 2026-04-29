@@ -1,8 +1,7 @@
-dm text=tea;
-sigma vowels=0;
-sigma consonants=0;
+dm text = "tea";
+sigma vowels = 0;
 
-spam(sigma i=0;i<text.length;i++)
+spam(sigma i = 0; i < text.length; i++)
 {
     vibeCheck(
         text[i]=="a"||text[i]=="e"||text[i]=="i"||
@@ -12,13 +11,7 @@ spam(sigma i=0;i<text.length;i++)
     ){
         vowels++;
     }
-    vibeFlop
-    {
-        consonants++;
-    }
 }
 
 spill "Vowels:";
 spill vowels;
-spill "Consonants:";
-spill consonants;

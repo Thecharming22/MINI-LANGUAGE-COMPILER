@@ -5,9 +5,11 @@ spam(sigma i=0; i<x; i=i+1)
     vibeCheck(i%2==0)
     {
         spill i;
+        spill " is Even";
     }
     vibeFlop
     {
         spill i;
+        spill " is Odd";
     }
 }
